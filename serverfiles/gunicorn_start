@@ -1,0 +1,28 @@
+#!/bin/sh
+
+NAME="oinkoink"
+DJANGODIR=/oinkroot/oinkoink_3_6_4/oinkoink
+SOCKFILE=/oinkroot/oinkoink_3_6_4/run/gunicorn.sock
+USER=oinkuser
+GROUP=oinkgroup
+NUM_WORKERS=3
+DJANGO_SETTINGS_MODULE=oinkoink.settings
+DJANGO_WSGI_MODULE=oinkoink.wsgi
+TIMEOUT=120
+
+cd $DJANGODIR
+source ../bin/activate
+export DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
+export PYTHONPATH=$DJANGODIR:$PYTHONPATH
+
+RUNDIR=$(dirname $SOCKFILE)
+test -d $RUNDIR || mkdir -p $RUNDIR
+
+exec ../bin/gunicorn ${DJANGO_WSGI_MODULE}:application \
+  --name $NAME \
+  --workers $NUM_WORKERS \
+  --timeout $TIMEOUT \
+  --user=$USER --group=$GROUP \
+  --bind=unix:$SOCKFILE \
+  --log-level=debug \
+  --log-file=-
