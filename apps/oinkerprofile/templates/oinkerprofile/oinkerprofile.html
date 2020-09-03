@@ -1,0 +1,112 @@
+{% extends 'core/base.html' %}
+
+{% load humanize %}
+
+{% block content %}
+    <div class="container" id="oinkerprofileapp">
+        <div class="columns">
+            <div class="column is-12">
+                <h1 class="title">{{ user.username }}</h1>
+
+                {% if user.oinkerprofile.avatar %}
+                    <figure class="image is-128x128">
+                        <img src="{{ user.oinkerprofile.avatar.url }}">
+                    </figure>
+                {% endif %}
+
+                <hr>
+
+                <p><a href="{% url 'followers' user.username %}">Followers: {{ user.oinkerprofile.followed_by.count }}</a></p>
+                <p><a href="{% url 'follows' user.username %}">Follows: {{ user.oinkerprofile.follows.count }}</a></p>
+
+                {% if user != request.user %}
+                    <a href="{% url 'conversation' user.id %}" class="button is-info">Send message</a>
+                    
+                    {% if request.user.oinkerprofile in user.oinkerprofile.followed_by.all %}
+                        <a href="{% url 'unfollow_oinker' user.username %}" class="button is-danger">Unfollow</a>
+                    {% else %}
+                        <a href="{% url 'follow_oinker' user.username %}" class="button is-success">Follow</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="columns">
+            <div class="column is-8">
+                <div class="wrapper-oinks">
+                    {% for oink in oinks %}
+                        <div class="oink">
+                            <article class="media">
+                                <figure class="media-left">
+                                    <p class="image is-64x64">
+                                        {% if user.oinkerprofile.avatar %}
+                                            <img src="{{ user.oinkerprofile.avatar.url }}">
+                                        {% endif %}
+                                    </p>
+                                </figure>
+
+                                <div class="media-content">
+                                    <div class="content">
+                                        <p>
+                                            <strong>{{ oink.created_by.username }}</strong>
+                                            <small>{{ oink.created_at|naturaltime }}</small>
+                                            <br>
+                                            {{ oink.body }}
+                                            <br>
+                                            <a @click="likeOink({{ oink.id}})" v-if="!liked_oinks.includes({{ oink.id }})">Like</a>
+                                            <span v-if="liked_oinks.includes({{ oink.id }})">Liked</span>
+                                            <small id="likes-{{ oink.id }}">{{ oink.likes.count }} likes</small>
+                                        </p>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script>
+    new Vue({
+        el: '#oinkerprofileapp',
+        delimiters: ['[[', ']]'],
+        data () {
+            return {
+                liked_oinks: [{% for oink in oinks %}{% if oink.liked %}{{ oink.id }},{% endif %}{% endfor %}]
+            }
+        },
+        methods: {
+            likeOink(oink_id) {
+                this.liked_oinks.push(parseInt(oink_id));
+
+                var oink = {
+                    'oink_id': oink_id
+                };
+
+                fetch('/api/add_like/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify(oink)
+                })
+                .then((response) => {
+                    console.log(response);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+
+                const el = document.getElementById('likes-' + oink_id);
+                const likes = parseInt(el.innerHTML.split(' ')[0] + 1);
+                el.innerHTML = likes + ' likes';  
+            }
+        }
+    })
+</script>
+{% endblock %}

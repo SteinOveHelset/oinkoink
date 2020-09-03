@@ -1,0 +1,78 @@
+{% extends 'core/base.html' %}
+
+{% load humanize %}
+
+{% block content %}
+    <div class="container">
+        <div class="columns">
+            <div class="column is-12">
+                <h1 class="title">Search</h1>
+
+                <p>Search term: "{{ query }}"</p>
+
+                <hr>
+
+                <form method="get" action="{% url 'search' %}">
+                    <div class="field">
+                        <div class="control">
+                            <input type="text" class="input" name="query" value="{{ query }}">
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <div class="control">
+                            <button class="button is-success">Search</button>
+                        </div>
+                    </div>
+                </form>
+
+                <hr>
+
+                <div class="search-results">
+                    {% if not oinkers and not oinks %}
+                        <p>No results, please try a different search term..</p>
+                    {% endif %}
+                    
+                    {% if oinkers %}
+                        <strong>Oinkers</strong>
+
+                        {% for oinker in oinkers %}
+                            <p><a href="{% url 'oinkerprofile' oinker.username %}">{{ oinker.username }}</a></p>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if oinks %}
+                        <strong>Oinks</strong>
+
+                        <div class="wrapper-oinks">
+                            {% for oink in oinks %}
+                            <div class="oink">
+                                <article class="media">
+                                    <figure class="media-left">
+                                        <p class="image is-64x64">
+                                            {% if oink.created_by.oinkerprofile.avatar %}
+                                                <img src="{{ oink.created_by.oinkerprofile.avatar.url }}">
+                                            {% endif %}
+                                        </p>
+                                    </figure>
+    
+                                    <div class="media-content">
+                                        <div class="content">
+                                            <p>
+                                                <strong><a href="{% url 'oinkerprofile' oink.created_by.username %}">{{ oink.created_by.username }}</a></strong>
+                                                <small>{{ oink.created_at|naturaltime }}</small>
+                                                <br>
+                                                {{ oink.body }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </article>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

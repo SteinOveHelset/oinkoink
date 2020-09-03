@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+
+{% load static %}
+
+<html>
+    <head>
+        <!-- Meta -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- Title -->
+        <title>OinkOink</title>
+
+        <!-- Styles -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
+        <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    </head>
+
+    <body>
+        <!-- Nav -->
+        <nav class="navbar is-info" role="navigation">
+            <div class="navbar-brand">
+                <a href="/" class="navbar-item"><strong>OinkOink</strong></a>
+
+                <a class="navbar-burger">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div class="navbar-menu">
+                <div class="navbar-start">
+                    <div class="navbar-item">
+                        <form method="get" action="{% url 'search' %}">
+                            <div class="field has-addons">
+                                <div class="control">
+                                    <input type="text" class="input" placeholder="Search" name="query">
+                                </div>
+                                <div class="control">
+                                    <button class="button is-success">Search</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="navbar-end">
+                    {% if request.user.is_authenticated %}
+                        <a href="{% url 'notifications' %}" class="navbar-item">Notifications ({{ notifications.count }})</a>
+                        <a href="{% url 'feed' %}" class="navbar-item">Feed</a>
+                        <a href="{% url 'conversations' %}" class="navbar-item">Conversations</a>
+                        <a href="{% url 'oinkerprofile' request.user.username %}" class="navbar-item">Profile</a>
+                        <a href="{% url 'edit_profile' %}" class="navbar-item">Edit profile</a>
+                    {% endif %}
+
+                    <div class="navbar-item">
+                        <div class="buttons">
+                            {% if request.user.is_authenticated %}
+                                <a href="{% url 'logout' %}" class="button is-danger">Log out</a>
+                            {% else %}
+                                <a href="{% url 'signup' %}" class="button is-success"><strong>Sign up</strong></a>
+                                <a href="{% url 'login' %}" class="button is-light">Log in</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <!-- End Nav -->
+
+        <!-- Content -->
+        <section class="section">
+            {% block content %}
+            {% endblock %}
+        </section>
+        <!-- End Content -->
+
+        <!-- Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        {% block script %}
+        {% endblock %}
+        <!-- End Scripts -->
+    </body>
+</html>

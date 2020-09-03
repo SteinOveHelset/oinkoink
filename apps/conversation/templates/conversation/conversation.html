@@ -1,0 +1,126 @@
+{% extends 'core/base.html' %}
+
+{% load humanize %}
+
+{% block content %}
+    <div class="container" id="conversationapp">
+        <div class="columns">
+            <div class="column is-12">
+                <h1 class="title">Conversation</h1>
+
+                <div class="messages">
+                    {% for message in conversation.messages.all %}
+                        <div class="oink">
+                            <article class="media">
+                                <figure class="media-left">
+                                    <p class="image is-64x64">
+                                        {% if message.created_by.oinkerprofile.avatar %}
+                                            <img src="{{ message.created_by.oinkerprofile.avatar.url }}">
+                                        {% endif %}
+                                    </p>
+                                </figure>
+
+                                <div class="media-content">
+                                    <div class="content">
+                                        <p>
+                                            <strong>{{ message.created_by.username }}</strong> <small>{{ message.created_at|naturaltime }}</small>
+                                            <br>
+                                            {{ message.content }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    {% endfor %}
+
+                    <div class="oink" v-for="message in messages">
+                        <article class="media">
+                            <figure class="media-left">
+                                <p class="image is-64x64">
+                                    <img :src="message.avatar">
+                                </p>
+                            </figure>
+
+                            <div class="media-content">
+                                <div class="content">
+                                    <p>
+                                        <strong>[[ message.oinker ]]</strong> <small>[[ message.created_at ]]</small>
+                                        <br>
+                                        [[ message.content ]]
+                                    </p>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <form v-on:submit.prevent="submitMessage()">
+            <div class="field">
+                <div class="control">
+                    <textarea class="textarea" v-model="content" placeholder="Your message"></textarea>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="control">
+                    <button class="button is-success">Send</button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script>
+    var conversationapp = new Vue({
+        el: '#conversationapp',
+        delimiters: ['[[', ']]'],
+        data () {
+            return {
+                messages: [],
+                content: '',
+                oinker: '{{ request.user.username }}',
+                created_at: 'Now',
+                avatar: '{% if request.user.oinkerprofile.avatar %}{{ request.user.oinkerprofile.avatar.url }}{% endif %}'
+            }
+        },
+        methods: {
+            submitMessage() {
+                if (this.content.length > 0) {
+                    var message = {
+                        'content': this.content,
+                        'oinker': this.oinker,
+                        'created_at': this.created_at,
+                        'avatar': this.avatar,
+                        'conversation_id': '{{ conversation.id }}'
+                    };
+
+                    this.messages.unshift(message);
+
+                    fetch('/api/add_message/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        credentials: 'same-origin',
+                        body: JSON.stringify(message)
+                    })
+                    .then((response) => {
+                        console.log(response)
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    })
+
+                    this.content = '';
+                }
+            }
+        }
+    })
+</script>
+{% endblock %}

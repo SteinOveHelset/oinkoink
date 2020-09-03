@@ -1,0 +1,59 @@
+{% extends 'core/base.html' %}
+
+{% load humanize %}
+
+{% block content %}
+    <div class="container">
+        <div class="columns">
+            <div class="column is-12">
+                <h1 class="title">Notifications</h1>
+
+                {% if not notifications %}
+                    <p>You have no notifications!</p>
+                {% endif %}
+
+                <div class="wrapper-oinks">
+                    {% for notification in notifications %}
+                        <article class="media">
+                            <figure class="media-left">
+                                <p class="image is-64x64">
+                                    {% if notification.created_by.oinkerprofile.avatar %}
+                                        <img src="{{ notification.created_by.oinkerprofile.avatar.url }}">
+                                    {% endif %}
+                                </p>
+                            </figure>
+
+                            <div class="media-content">
+                                <div class="content">
+                                    <p>
+                                        {% if notification.notification_type == 'message' %}
+                                            <a href="{% url 'notifications' %}?goto=conversation&notification={{ notification.id }}">
+                                                <strong>{{ notification.created_by.username }}</strong> sent you a message<br>
+                                                <small>{{ notification.created_at|naturaltime }}</small>
+                                            </a>
+                                        {% elif notification.notification_type == 'follower' %}
+                                            <a href="{% url 'notifications' %}?goto=oinkerprofile&notification={{ notification.id }}">
+                                                <strong>{{ notification.created_by.username }}</strong> started following you<br>
+                                                <small>{{ notification.created_at|naturaltime }}</small>
+                                            </a>
+                                        {% elif notification.notification_type == 'like' %}
+                                            <a href="{% url 'notifications' %}?goto=oinkerprofile&notification={{ notification.id }}">
+                                                <strong>{{ notification.created_by.username }}</strong> liked an oink you wrote<br>
+                                                <small>{{ notification.created_at|naturaltime }}</small>
+                                            </a>
+                                        {% elif notification.notification_type == 'mention' %}
+                                            <a href="{% url 'notifications' %}?goto=oinkerprofile&notification={{ notification.id }}">
+                                                <strong>{{ notification.created_by.username }}</strong> mentioned you in an oink<br>
+                                                <small>{{ notification.created_at|naturaltime }}</small>
+                                            </a>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

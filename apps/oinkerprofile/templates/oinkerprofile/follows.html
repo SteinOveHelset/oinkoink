@@ -1,0 +1,29 @@
+{% extends 'core/base.html' %}
+
+{% load humanize %}
+
+{% block content %}
+    <div class="container">
+        <div class="columns">
+            <div class="column is-12">
+                <h1 class="title">Follows - {{ user.username }}</h1>
+
+                <p>Num: {{ user.oinkerprofile.follows.count }}</p>
+            </div>
+        </div>
+
+        <div class="columns">
+            <div class="column is-8">
+                {% for oinker in user.oinkerprofile.follows.all %}
+                    <p><a href="{% url 'oinkerprofile' oinker.user.username %}">{{ oinker.user.username }}</a></p>
+                {% empty %}
+                    {% if request.user == user %}
+                        <p>You don't follow anyone!</p>
+                    {% else %}
+                        <p>{{ user.username }} isnt't following anyone!</p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
