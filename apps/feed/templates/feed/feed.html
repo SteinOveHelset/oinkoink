@@ -118,7 +118,7 @@
                 });
 
                 const el = document.getElementById('likes-' + oink_id);
-                const likes = parseInt(el.innerHTML.split(' ')[0] + 1);
+                const likes = parseInt(el.innerHTML.split(' ')[0]) + 1;
                 el.innerHTML = likes + ' likes';  
             },
             submitOink() {
