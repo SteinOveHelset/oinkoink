@@ -99,7 +99,7 @@
                         'conversation_id': '{{ conversation.id }}'
                     };
 
-                    this.messages.unshift(message);
+                    this.messages.push(message);
 
                     fetch('/api/add_message/', {
                         method: 'POST',
